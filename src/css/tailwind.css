@@ -15,3 +15,19 @@
     @apply cursor-not-allowed bg-slate-300 text-slate-500;
   }
 }
+
+table.dataTable > thead tr th,
+table.dataTable > tbody tr td:not(.text-left) {
+  text-align: center !important;
+}
+
+div.dt-container.dt-empty-footer tbody > tr:last-child > * {
+  border: 0 !important;
+}
+
+.dt-paging-button.first,
+.dt-paging-button.last,
+.dt-paging-button.previous,
+.dt-paging-button.next {
+  display: none !important;
+}
