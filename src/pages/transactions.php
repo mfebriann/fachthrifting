@@ -28,7 +28,7 @@
   $totalAdminFee = $totalDanaKeluar['adminFee'] ?? 0;
 
   $queryTotalDanaMasuk = mysqli_query($conn, "SELECT SUM(total_price) as totalPrice FROM fach_thrifting.transactions WHERE status = 'pemasukkan'");
-  $totalDanaMasuk = mysqli_fetch_assoc($queryTotalDanaMasuk)['totalPrice'];
+  $totalDanaMasuk = mysqli_fetch_assoc($queryTotalDanaMasuk)['totalPrice'] ?? 0;
   ?>
 
   <main class="mt-20 px-4">
