@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fach Thrifting</title>
+  <title>Fach Thrifting - Lihat Transaksi</title>
   <link rel="stylesheet" href="../css/styles.css" />
   <link href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css" rel="stylesheet">
 
@@ -20,6 +20,15 @@
     $transactions[] = $row;
   }
   $no = 1;
+
+  $queryTotalDanaKeluar = mysqli_query($conn, "SELECT SUM(total_price) as totalPrice, SUM(admin_fee) as adminFee FROM fach_thrifting.transactions WHERE status = 'pengeluaran'");
+  $totalDanaKeluar = mysqli_fetch_assoc($queryTotalDanaKeluar);
+
+  $totalPrice = $totalDanaKeluar['totalPrice'] ?? 0;
+  $totalAdminFee = $totalDanaKeluar['adminFee'] ?? 0;
+
+  $queryTotalDanaMasuk = mysqli_query($conn, "SELECT SUM(total_price) as totalPrice FROM fach_thrifting.transactions WHERE status = 'pemasukkan'");
+  $totalDanaMasuk = mysqli_fetch_assoc($queryTotalDanaMasuk)['totalPrice'];
   ?>
 
   <main class="mt-20 px-4">
@@ -29,18 +38,39 @@
         <a href="#" class="text-blue-500 underline hover:opacity-50" onclick="history.back()">Kembali</a>
       </div>
       <div class="mt-5 flex flex-col gap-3">
-        <div class="bg-red-500 rounded-md text-white p-4 h-36">
-          <p class="font-semibold">Total Dana Keluar</p>
-          <p class="text-3xl font-bold mt-2">Rp 1,000,000</p>
-          <p class="mt-4 text-sm">Total biaya kirim: Rp 20,000</p>
+        <div class="bg-purple-600 rounded-md text-white p-4 h-36">
+          <div class="flex justify-between flex-wrap gap-2">
+            <p class="font-semibold">Total Saldo Sekarang</p>
+            <p class="text-sm font-bold">
+              <?= $totalDanaMasuk === ($totalPrice + $totalAdminFee) ? '' : ($totalDanaMasuk > ($totalPrice + $totalAdminFee) ? 'Yeay kita untung 😍' : 'Kita lagi rugi nih 😭') ?>
+            </p>
+          </div>
+          <p class="text-3xl font-bold mt-2">Rp
+            <?= number_format($totalDanaMasuk - ($totalPrice + $totalAdminFee)) ?>
+          </p>
         </div>
         <div class="bg-green-500 rounded-md text-white p-4 h-36">
           <p class="font-semibold">Total Dana Masuk</p>
-          <p class="text-3xl font-bold mt-2">Rp 1,000,000</p>
+          <p class="text-3xl font-bold mt-2">Rp
+            <?= number_format($totalDanaMasuk) ?>
+          </p>
+        </div>
+        <div class="bg-red-500 rounded-md text-white p-4 h-36">
+          <p class="font-semibold">Total Dana Keluar</p>
+          <p class="text-3xl font-bold mt-2">Rp
+            <?= number_format($totalPrice) ?>
+          </p>
+          <p class="mt-4 text-sm ">Total biaya admin: <span class="font-semibold">Rp
+              <?= number_format($totalAdminFee) ?>
+            </span>
+          </p>
         </div>
       </div>
 
       <div class="mt-14 overflow-auto">
+        <a href="new-transactions.php"
+          class="block bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-3 rounded-md ml-auto sm:w-max text-center mb-2 text-sm sm:text-base ">Tambah
+          Transaksi Baru</a>
         <table cellpadding="10" class="w-full" id="transactions">
           <thead>
             <tr class="whitespace-nowrap">
@@ -111,7 +141,7 @@
                   <?= !$transaction['stok'] ? '-' : $transaction['stok'] ?>
                 </td>
                 <td class="capitalize">
-                  <?= !$transaction['category'] ? '-' : $transaction['category'] ?>
+                  <?= !$transaction['category'] ? '-' : str_replace('-', ' ', $transaction['category']) ?>
                 </td>
                 <td
                   class="font-medium capitalize <?= $transaction['status'] === 'pemasukkan' ? 'text-green-500' : 'text-red-500' ?>">
@@ -178,6 +208,14 @@
         topStart: {
           buttons: [
             {
+              title: 'FachThrifting',
+              extend: 'pdfHtml5',
+              exportOptions: {
+                columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+              },
+            },
+            {
+              title: 'FachThrifting',
               extend: 'excelHtml5',
               exportOptions: {
                 columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -205,12 +243,6 @@
                   }
                 });
               }
-            },
-            {
-              extend: 'pdfHtml5',
-              exportOptions: {
-                columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-              },
             },
           ],
         }

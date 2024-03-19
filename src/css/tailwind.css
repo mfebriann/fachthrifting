@@ -14,6 +14,14 @@
   .btn-submit-nonactive {
     @apply cursor-not-allowed bg-slate-300 text-slate-500;
   }
+
+  select {
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 99%;
+    background-position-y: 8px;
+    border: 1px solid #dfdfdf;
+  }
 }
 
 table.dataTable > thead tr th,
@@ -30,4 +38,31 @@ div.dt-container.dt-empty-footer tbody > tr:last-child > * {
 .dt-paging-button.previous,
 .dt-paging-button.next {
   display: none !important;
+}
+
+.dt-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.dt-button {
+  color: #fff;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+.buttons-excel {
+  background-color: #1e814b;
+}
+
+.buttons-excel:hover {
+  background-color: #1aa759;
+}
+
+.buttons-pdf {
+  background-color: #dd1211;
+}
+
+.buttons-pdf:hover {
+  background-color: #ef463b;
 }

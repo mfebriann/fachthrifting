@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fach Thrifting - Settings</title>
+  <title>Fach Thrifting - Pengaturan</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 
@@ -32,7 +32,7 @@
       $fileName = strtolower(explode('.', $tempFileName)[0]);
 
       $imagesDirectory = $_SERVER['DOCUMENT_ROOT'] . "/Rian-Folder-Backend/FachThrifting/Website/src/images/photoProfile/";
-      $newFileName = $fileName . "-" . date("Y.m.d") . ".{$imageExtension}";
+      $newFileName = $fileName . "-" . date("Y.m.d-H.i.s") . ".{$imageExtension}";
 
       mysqli_query($conn, "UPDATE `members` SET `name` = '$newName', username = '$newUsername', photo_profile = '$newFileName', dateupdated = NOW() WHERE member = $id");
 
