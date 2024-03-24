@@ -1,9 +1,9 @@
 const uploadImages = document.getElementById("submit-images");
+const inputFile = document.getElementById("images");
 if (uploadImages != null) {
   uploadImages.addEventListener("click", () => {
     const container = document.getElementById("container-images");
     const inputHidden = document.getElementById("id-images");
-    const inputFile = document.getElementById("images");
 
     sendFiles(container, inputHidden, inputFile);
   });
@@ -24,13 +24,15 @@ const sendFiles = (container, inputHidden, inputFile) => {
         if (response === "error") {
           Swal.fire("Gambar gagal di upload", "", "error");
         } else {
+          images.value = "";
           const result = JSON.parse(response);
           previewAttachment(file, container, result["id"]);
           inputHidden.setAttribute("value", result["files"]);
+          const sourceImage = result["filename"];
 
           const btnDeleteElement = document.getElementById(result["id"]);
           btnDeleteElement.addEventListener("click", function () {
-            btnDelete("no", btnDeleteElement);
+            btnDelete("no", btnDeleteElement, false, sourceImage);
           });
         }
       }
@@ -77,11 +79,17 @@ const previewAttachment = (file, container, id) => {
   container.prepend(div);
 };
 
-const btnDelete = (int = "no", btnDeleteElement, notAdd = false) => {
+const btnDelete = (
+  int = "no",
+  btnDeleteElement,
+  notAdd = false,
+  sourceImage,
+) => {
   const transactionId = document.getElementById("transaction-id").value;
   let delId = notAdd ? btnDeleteElement.id : $(btnDeleteElement).attr("id");
   const cardFile = btnDeleteElement.parentElement.parentElement.parentElement;
   const inputHidden = cardFile.parentElement.previousElementSibling.children[0];
+
   Swal.fire({
     title: "Apa kamu yakin mau menghapus?",
     text: "Kamu mau menghapus gambar ini?",
@@ -103,13 +111,14 @@ const btnDelete = (int = "no", btnDeleteElement, notAdd = false) => {
           integer: int,
           transactionId,
           notAddPage: notAdd == true ? "true" : "false",
+          sourceImage,
         },
         success: function (response) {
           console.log(response);
           const jsonResponse = JSON.parse(response);
           if (jsonResponse["success"] == "success") {
             cardFile.remove();
-            Swal.fire("Deleted!", "Your file has been deleted.", "success");
+            Swal.fire("Deleted!", "Gambar kamu berhasil dihapus!", "success");
             if (jsonResponse["listArray"] == 0) {
               inputHidden.setAttribute("value", "");
             } else {
@@ -126,6 +135,10 @@ const btnDelete = (int = "no", btnDeleteElement, notAdd = false) => {
 const buttonsDeleteImage = document.querySelectorAll("button.action-file");
 buttonsDeleteImage.forEach((buttonDeleteImage) => {
   buttonDeleteImage.addEventListener("click", function () {
-    btnDelete("no", this, true);
+    const sourceImage =
+      buttonDeleteImage.parentElement.previousElementSibling.children[0].src.split(
+        "products/",
+      )[1];
+    btnDelete("no", buttonDeleteImage, true, sourceImage);
   });
 });

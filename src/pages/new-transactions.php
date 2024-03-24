@@ -25,25 +25,27 @@
     $status = $_POST['status'];
     $pesanTransaksi = htmlspecialchars($_POST['pesan-transaksi'], ENT_QUOTES, 'UTF-8');
     $totalHarga = str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['total-harga']), ENT_QUOTES, 'UTF-8'));
-    $adminFee = !$_POST['biaya-admin'] ? "NULL" : str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['biaya-admin']), ENT_QUOTES, 'UTF-8'));
-    $description = !$_POST['keterangan'] ? "NULL" : "'" . htmlspecialchars($_POST['keterangan'], ENT_QUOTES, 'UTF-8') . "'";
-    $idImages = $_POST['id-images'];
+    $adminFee = $_POST['biaya-admin'] !== '' ? "'" . str_replace(',', '', $_POST['biaya-admin']) . "'" : "NULL";
+    $description = $_POST['keterangan'] !== '' ? "'" . htmlspecialchars($_POST['keterangan'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
+    $idImages = $_POST['id-images'] !== '' ? "'" . $_POST['id-images'] . "'" : "NULL";
 
     if ($isProduct === 'yes') {
-      $size = !$_POST['ukuran'] ? "NULL" : "'" . htmlspecialchars($_POST['ukuran'], ENT_QUOTES, 'UTF-8') . "'";
-      $stok = !$_POST['stok'] ? "NULL" : "'" . htmlspecialchars($_POST['stok'], ENT_QUOTES, 'UTF-8') . "'";
+      $nameProduct = $_POST['nama-produk'] !== '' ? "'" . htmlspecialchars($_POST['nama-produk'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
+      $size = $_POST['ukuran'] !== '' ? "'" . htmlspecialchars($_POST['ukuran'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
+      $stok = $_POST['stok'] !== '' ? "'" . htmlspecialchars($_POST['stok'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
       $category = ($_POST['new-category'] !== "NULL" && $_POST['new-category'] !== "") ? str_replace(' ', '-', strtolower(htmlspecialchars($_POST['new-category'], ENT_QUOTES, 'UTF-8'))) : htmlspecialchars($_POST['category'], ENT_QUOTES, 'UTF-8');
       $hargaItem = !$_POST['harga-item'] ? "NULL" : str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-item']), ENT_QUOTES, 'UTF-8'));
-      $hargaMaxNego = !$_POST['harga-max-nego'] ? "NULL" : str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-max-nego']), ENT_QUOTES, 'UTF-8'));
-      $resi = !$_POST['resi-kurir'] ? "NULL" : str_replace(',', '', "'" . htmlspecialchars(str_replace('.', '', $_POST['resi-kurir']), ENT_QUOTES, 'UTF-8')) . "'";
+      $hargaMaxNego = $_POST['harga-max-nego'] !== '' ? "'" . str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-max-nego']), ENT_QUOTES, 'UTF-8')) . "'" : "NULL";
+      $resi = $_POST['resi-kurir'] !== '' ? "'" . str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['resi-kurir']), ENT_QUOTES, 'UTF-8')) . "'" : "NULL";
 
-      mysqli_query($conn, "INSERT INTO `products` VALUES(NULL, '{$name}', {$authorId}, '{$pesanTransaksi}', $size, {$stok}, '{$hargaItem}', {$hargaMaxNego}, {$description}, '$idImages', NOW(), 'available')");
+      mysqli_query($conn, "INSERT INTO `products` VALUES(NULL, '$name', $authorId, $nameProduct, $size, $stok, '$category', '$hargaItem', $hargaMaxNego, $description, $idImages, NOW(), NULL, 'available', 'yes')");
 
       $query = mysqli_query($conn, "SELECT product FROM `products` ORDER BY product DESC LIMIT 0,1");
       $productId = mysqli_fetch_assoc($query)['product'];
-      mysqli_query($conn, "INSERT INTO `transactions` VALUES(NULL, '{$pesanTransaksi}', '{$name}', {$authorId}, '{$isProduct}', '{$status}', $size, {$stok}, '{$category}', $resi, '{$totalHarga}', '{$hargaItem}', {$hargaMaxNego}, {$adminFee}, {$description}, '$idImages', $productId ,NOW(), NULL)");
+
+      mysqli_query($conn, "INSERT INTO `transactions` VALUES(NULL, '{$pesanTransaksi}', '$name', $authorId, $nameProduct, '$isProduct', '$status', $size, $stok, '$category', $resi, '$totalHarga', '$hargaItem', $hargaMaxNego, $adminFee, $description, $idImages, $productId ,NOW(), NULL)");
     } else {
-      mysqli_query($conn, "INSERT INTO `transactions` (transaction, message, author, author_id, status, isproduct, total_price, admin_fee, description, images, datetime) VALUES(NULL, '$pesanTransaksi', '$name', $authorId, '$status', '$isProduct', $totalHarga, $adminFee, $description, '$idImages', NOW())");
+      mysqli_query($conn, "INSERT INTO `transactions` (`transaction`, `message`, author, author_id, `status`, isproduct, total_price, admin_fee, `description`, images, `datetime`) VALUES(NULL, '$pesanTransaksi', '$name', $authorId, '$status', '$isProduct', $totalHarga, $adminFee, $description, $idImages, NOW())");
     }
 
     if (mysqli_affected_rows($conn) > 0) {
@@ -53,8 +55,6 @@
     }
   }
   ?>
-
-
 
   <main class="mt-20 px-4">
     <section class="container mx-auto">
@@ -92,6 +92,11 @@
             class="rounded-md border border-slate-500 px-3 py-2 outline-none" />
         </div>
         <div class="flex flex-col gap-3 isproduct">
+          <label for="nama-produk" class="text-slate-600">Nama produk</label>
+          <input type="text" name="nama-produk" id="nama-produk" required
+            class="rounded-md border border-slate-500 px-3 py-2 outline-none" />
+        </div>
+        <div class="flex flex-col gap-3 isproduct">
           <label for="ukuran" class="text-slate-600">Ukuran
             <span class="text-xs text-slate-500">(Optional)</span></label>
           <input type="text" name="ukuran" id="ukuran"
@@ -100,7 +105,7 @@
         <div class="flex flex-col gap-3 isproduct">
           <label for="stok" class="text-slate-600">Stok</label>
           <input type="number" name="stok" id="stok" required
-            class="rounded-md border border-slate-500 px-3 py-2 outline-none" />
+            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="1" />
         </div>
         <div class="flex flex-col gap-3 isproduct">
           <div class="flex justify-between items-center">
@@ -128,7 +133,7 @@
           <label for="total-harga" class="text-slate-600">Total harga</label>
           <div class="relative flex items-center">
             <span class="absolute left-3">Rp</span>
-            <input type="text" name="total-harga" id="total-harga" required
+            <input type="tel" name="total-harga" id="total-harga" required
               class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none" />
           </div>
         </div>
@@ -136,7 +141,7 @@
           <label for="harga-item" class="text-slate-600">Harga 1 barang</label>
           <div class="relative flex items-center">
             <span class="absolute left-3">Rp</span>
-            <input type="text" name="harga-item" id="harga-item" required
+            <input type="tel" name="harga-item" id="harga-item" required
               class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none" />
           </div>
         </div>
@@ -146,7 +151,7 @@
           </label>
           <div class="relative flex items-center">
             <span class="absolute left-3">Rp</span>
-            <input type="text" name="harga-max-nego" id="harga-max-nego"
+            <input type="tel" name="harga-max-nego" id="harga-max-nego"
               class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none" />
           </div>
         </div>
@@ -156,7 +161,7 @@
             <span class="text-xs text-slate-500">(Optional)</span></label>
           <div class="relative flex items-center">
             <span class="absolute left-3">Rp</span>
-            <input type="text" name="biaya-admin" id="biaya-admin"
+            <input type="tel" name="biaya-admin" id="biaya-admin"
               class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none" />
           </div>
         </div>
@@ -179,7 +184,7 @@
               <span class="islabelproduct">Gambar produk/Bukti transfer</span>
               <span class="text-xs text-slate-500">(Optional)</span>
             </label>
-            <div class="flex gap-3">
+            <div class="flex gap-2">
               <input
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:bg-gray-300 file:px-3 file:h-full file:border-0"
                 name="images" id="images" type="file" accept="image/png, image/jpg, image/jpeg">

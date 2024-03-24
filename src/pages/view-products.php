@@ -13,31 +13,26 @@
 
   <?php
   $id = $_GET['id'];
-  $query = mysqli_query($conn, "SELECT * FROM `transactions` WHERE transaction = $id");
+  $query = mysqli_query($conn, "SELECT * FROM `products` WHERE product = $id");
   $response = mysqli_fetch_assoc($query);
 
-  $transaction = $response['transaction'];
+  $product = $response['product'];
   $author = $response['author'];
   $status = $response['status'];
-  $isProduct = $response['isproduct'];
-  $message = $response['message'];
-  $nameProduct = $response['name_product'];
+  $name = $response['name'];
   $size = $response['size'];
   $stok = $response['stok'];
   $category = $response['category'];
-  $resi = $response['resi'];
-  $totalPrice = $response['total_price'];
   $priceItem = $response['price_item'];
   $priceMaxNego = $response['price_max_nego'];
-  $adminFee = $response['admin_fee'];
   $description = $response['description'];
-  $images = $response['images'];
+  $images = $response['image_code'];
   ?>
 
   <main class="mt-20 px-4">
     <section class="container mx-auto">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-3xl font-semibold text-slate-700">Lihat Transaksi</h1>
+        <h1 class="text-3xl font-semibold text-slate-700">Lihat Produk</h1>
         <a href="#" class="text-blue-500 underline hover:opacity-50" onclick="history.back()">Kembali</a>
       </div>
       <form method="POST" class="mt-7 flex flex-col gap-5">
@@ -49,26 +44,15 @@
             class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $author ?>" />
         </div>
         <div class="flex flex-col gap-3">
-          <label for="status" class="text-slate-600">Status transaksi</label>
+          <label for="status" class="text-slate-600">Status stok</label>
           <input type="text" name="status" id="status" required readonly
             class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none capitalize"
-            value="<?= $status ?>" />
-        </div>
-        <div class="flex items-center gap-2">
-          <input type="checkbox" name="product-check" id="product-check" class="w-5 h-5" <?= $isProduct === 'yes' ? "checked" : "" ?> onclick="return false;" readonly />
-          <label for="product-check" class="w-full text-sm text-slate-600 sm:text-base">Apakah ini berhubungan
-            dengan produk?</label>
+            value="<?= $status === 'available' ? 'Tersedia' : 'Habis' ?>" />
         </div>
         <div class="flex flex-col gap-3">
-          <label for="pesan-transaksi" class="text-slate-600">Pesan transaksi</label>
-          <input type="text" name="pesan-transaksi" id="pesan-transaksi" required readonly
-            class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $message ?>" />
-        </div>
-        <div class="flex flex-col gap-3 isproduct">
           <label for="nama-produk" class="text-slate-600">Nama produk</label>
           <input type="text" name="nama-produk" id="nama-produk" required readonly
-            class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none"
-            value="<?= $nameProduct ?>" />
+            class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $name ?>" />
         </div>
         <div class="flex flex-col gap-3 isproduct">
           <label for="ukuran" class="text-slate-600">Ukuran
@@ -86,15 +70,6 @@
           <input type="text" name="category" id="category" required readonly
             class="rounded-md border capitalize border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none"
             value="<?= str_replace('-', ' ', $category) ?>" />
-        </div>
-        <div class="flex flex-col gap-3">
-          <label for="total-harga" class="text-slate-600">Total harga</label>
-          <div class="relative flex items-center">
-            <span class="absolute left-3">Rp</span>
-            <input type="text" name="total-harga" id="total-harga" required readonly
-              class="w-full rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 pl-9 outline-none"
-              value="<?= number_format($totalPrice) ?>" />
-          </div>
         </div>
         <div class="flex flex-col gap-3 isproduct">
           <label for="harga-item" class="text-slate-600">Harga 1 barang</label>
@@ -115,23 +90,6 @@
               class="w-full rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 pl-9 outline-none"
               value="<?= number_format($priceMaxNego) ?>" />
           </div>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <label for="biaya-admin" class="text-slate-600">Biaya admin kirim
-            <span class="text-xs text-slate-500">(Optional)</span></label>
-          <div class="relative flex items-center">
-            <span class="absolute left-3">Rp</span>
-            <input type="text" name="biaya-admin" id="biaya-admin" readonly
-              class="w-full rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 pl-9 outline-none"
-              value="<?= number_format($adminFee) ?>" />
-          </div>
-        </div>
-        <div class="flex flex-col gap-3 isproduct">
-          <label for="resi-kurir" class="text-slate-600">Resi
-            <span class="text-xs text-slate-500">(Optional)</span></label>
-          <input type="text" name="resi-kurir" id="resi-kurir" readonly
-            class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $resi ?>" />
         </div>
         <div class="flex flex-col gap-3">
           <label for="keterangan" class="text-slate-600">Keterangan

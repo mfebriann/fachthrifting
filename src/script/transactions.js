@@ -4,8 +4,8 @@ const isLabelProduct = document.querySelector(".islabelproduct");
 const requiredInputs = Array.from(
   document.querySelectorAll("input[required], select[required]"),
 );
-const requiredInputsFirst = requiredInputs.slice(2, 4);
-const requiredInputsLast = requiredInputs[5];
+const requiredInputsFirst = requiredInputs.slice(2, 5);
+const requiredInputsLast = requiredInputs[6];
 const mergeRequiredInputs = [...requiredInputsFirst, requiredInputsLast];
 
 const checkedProduct = (checkbox) => {

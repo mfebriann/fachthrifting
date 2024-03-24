@@ -27,13 +27,13 @@ $websiteName = "fachthrifting.modifwebsite.id/assets/";
             class="block px-3 py-2 font-medium hover:bg-blue-100 hover:opacity-80 md:p-0 md:text-white md:hover:bg-transparent">Transaksi</a>
         </li>
         <li>
-          <a href="products-stok.php"
+          <a href="products.php"
             class="block px-3 py-2 font-medium hover:bg-blue-100 hover:opacity-80 md:p-0 md:text-white md:hover:bg-transparent">Stok
             Produk</a>
         </li>
         <?php if ($role === 'super_admin'): ?>
           <li>
-            <a href="users.php"
+            <a href="members.php"
               class="block px-3 py-2 font-medium hover:bg-blue-100 hover:opacity-80 md:p-0 md:text-white md:hover:bg-transparent">Kelola
               Pengguna</a>
           </li>

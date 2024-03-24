@@ -12,95 +12,54 @@
   <?php include '../components/header.php' ?>
 
   <?php
-  if ($role !== 'super_admin' && $role !== 'admin') {
+  if ($role !== 'super_admin' || $role !== 'admin') {
     header("Location: dashboard.php");
     return;
   }
 
   $id = $_GET['id'];
-  $query = mysqli_query($conn, "SELECT * FROM `transactions` WHERE transaction = $id");
+  $query = mysqli_query($conn, "SELECT * FROM `products` WHERE product = $id");
   $response = mysqli_fetch_assoc($query);
 
-  $transaction = $response['transaction'];
-  $productId = $response['product_id'];
+  $product = $response['product'];
   $author = $response['author'];
-  $authorId = $response['author_id'];
   $status = $response['status'];
-  $isProduct = $response['isproduct'];
-  $message = $response['message'];
-  $nameProduct = $response['name_product'];
+  $name = $response['name'];
   $size = $response['size'];
   $stok = $response['stok'];
   $category = $response['category'];
-  $resi = $response['resi'];
-  $totalPrice = $response['total_price'];
   $priceItem = $response['price_item'];
   $priceMaxNego = $response['price_max_nego'];
-  $adminFee = $response['admin_fee'];
   $description = $response['description'];
-  $images = $response['images'];
-  $statusTransactions = ['pengeluaran', 'pemasukkan'];
+  $images = $response['image_code'];
 
   // Category
-  $queryCategories = mysqli_query($conn, 'SELECT DISTINCT `category` FROM transactions WHERE category != "" ');
+  $queryCategories = mysqli_query($conn, 'SELECT DISTINCT `category` FROM products WHERE category != "" ');
   $categories = [];
   while ($row = mysqli_fetch_assoc($queryCategories)) {
     $categories[] = $row;
   }
 
   if (isset ($_POST['submit'])) {
-    $isProduct = isset ($_POST['product-check']) ? 'yes' : 'no';
     $status = htmlspecialchars($_POST['status'], ENT_QUOTES, 'UTF-8');
-    $pesanTransaksi = htmlspecialchars($_POST['pesan-transaksi'], ENT_QUOTES, 'UTF-8');
-    $totalHarga = str_replace(',', '', $_POST['total-harga']); // Tidak perlu htmlspecialchars() karena ini adalah angka
-    $adminFee = $_POST['biaya-admin'] !== '' ? "'" . str_replace(',', '', $_POST['biaya-admin']) . "'" : "NULL";
+    $nameProduct = htmlspecialchars($_POST['nama-produk'], ENT_QUOTES, 'UTF-8');
     $description = $_POST['keterangan'] !== '' ? "'" . htmlspecialchars($_POST['keterangan'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
     $idImages = $_POST['id-images'] !== '' ? "'" . $_POST['id-images'] . "'" : "NULL";
+    $size = $_POST['ukuran'] !== '' ? "'" . htmlspecialchars($_POST['ukuran'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
+    $stok = $_POST['stok'] !== '' ? htmlspecialchars($_POST['stok'], ENT_QUOTES, 'UTF-8') : "NULL";
+    $category = ($_POST['new-category'] !== "NULL" && $_POST['new-category'] !== "") ? str_replace(' ', '-', strtolower(htmlspecialchars($_POST['new-category'], ENT_QUOTES, 'UTF-8'))) : htmlspecialchars($_POST['category'], ENT_QUOTES, 'UTF-8');
+    $hargaItem = !$_POST['harga-item'] ? "NULL" : str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-item']), ENT_QUOTES, 'UTF-8'));
+    $hargaMaxNego = $_POST['harga-max-nego'] !== '' ? "'" . str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-max-nego']), ENT_QUOTES, 'UTF-8')) . "'" : "NULL";
+    $statusProduct = $stok == 0 || $stok === '' ? 'sold' : 'available';
 
-    if ($isProduct === 'yes') {
-      $nameProduct = $_POST['nama-produk'] !== '' ? "'" . htmlspecialchars($_POST['nama-produk'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
-      $size = $_POST['ukuran'] !== '' ? "'" . htmlspecialchars($_POST['ukuran'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
-      $stok = $_POST['stok'] !== '' ? "'" . htmlspecialchars($_POST['stok'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
-      $category = ($_POST['new-category'] !== "NULL" && $_POST['new-category'] !== "") ? str_replace(' ', '-', strtolower(htmlspecialchars($_POST['new-category'], ENT_QUOTES, 'UTF-8'))) : htmlspecialchars($_POST['category'], ENT_QUOTES, 'UTF-8');
-      $hargaItem = !$_POST['harga-item'] ? "NULL" : str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-item']), ENT_QUOTES, 'UTF-8'));
-      $hargaMaxNego = $_POST['harga-max-nego'] !== '' ? "'" . str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['harga-max-nego']), ENT_QUOTES, 'UTF-8')) . "'" : "NULL";
-      $resi = $_POST['resi-kurir'] !== '' ? "'" . str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['resi-kurir']), ENT_QUOTES, 'UTF-8')) . "'" : "NULL";
-      $statusProduct = intval($stok) == 0 || $stok === '' ? 'sold' : 'available';
+    mysqli_query($conn, "UPDATE `transactions` SET `name_product` = '$nameProduct', `size` = $size, `stok` = $stok, `category` = '$category', `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `description` = $description, `images` = $idImages, `dateupdated` = NOW() WHERE product_id = $product");
 
-      if (isset ($productId)) {
-        mysqli_query($conn, "UPDATE `products` SET `name` = $nameProduct, `size` = $size, `stok` = $stok, `category` = '$category', `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `description` = $description, `image_code` = $idImages, `dateupdated` = NOW(), `status` = '$statusProduct', `is_show` = 'yes' WHERE product = $productId");
-        mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW() WHERE transaction = $id");
-      } else {
-        mysqli_query($conn, "INSERT INTO `products` VALUES(NULL, '$name', $authorId, $nameProduct, $size, $stok, '$category', $hargaItem, $hargaMaxNego, $description, $idImages, NOW(), NULL, 'available', 'yes')");
-
-        $query = mysqli_query($conn, "SELECT product FROM `products` ORDER BY product DESC LIMIT 0,1");
-        $productId = mysqli_fetch_assoc($query)['product'];
-
-        mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW(), product_id = $productId WHERE transaction = $id");
-
-      }
-
-    } else {
-      if (isset ($productId)) {
-        mysqli_query($conn, "UPDATE `products` SET `is_show` = 'no' WHERE product = $productId");
-      }
-
-      mysqli_query($conn, "UPDATE `transactions` SET 
-            `message` = '$pesanTransaksi', 
-            `isproduct` = '$isProduct', 
-            `status` = '$status', 
-            `total_price` = $totalHarga, 
-            `admin_fee` = $adminFee, 
-            `description` = $description, 
-            `images` = $idImages, 
-            `dateupdated` = NOW() 
-          WHERE transaction = $id");
-    }
+    mysqli_query($conn, "UPDATE `products` SET `name` = '$nameProduct', `size` = $size, `stok` = $stok, `category` = '$category', `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `description` = $description, `image_code` = $idImages, `dateupdated` = NOW(), `status` = '$statusProduct' WHERE product = $product");
 
     if (mysqli_affected_rows($conn) > 0) {
-      echo '<script>alert("Transaksi berhasil diubah"); window.location.href = "transactions.php"; </script>';
+      echo '<script>alert("Produk berhasil diubah"); window.location.href = "products.php"; </script>';
     } else {
-      echo '<script>alert("Transaksi gagal diubah"); window.location.href = "transactions.php"; </script>';
+      echo '<script>alert("Produk gagal diubah"); </script>';
     }
   }
   ?>
@@ -112,8 +71,8 @@
         <a href="#" class="text-blue-500 underline hover:opacity-50" onclick="history.back()">Kembali</a>
       </div>
       <form method="POST" class="mt-7 flex flex-col gap-5">
-        <input type="hidden" name="transaction-id" id="transaction-id" autocomplete="name" readonly
-          class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $transaction ?>" />
+        <input type="hidden" name="product-id" id="product-id" autocomplete="name" readonly
+          class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $product ?>" />
         <div class="flex flex-col gap-3">
           <label for="pembuat" class="text-slate-600">Pengguna yang membuat</label>
           <input type="text" name="pembuat" id="pembuat" readonly autocomplete="name" required
@@ -121,29 +80,15 @@
         </div>
         <div class="flex flex-col gap-3">
           <label for="status" class="text-slate-600">Status transaksi</label>
-          <select name="status" id="status"
-            class="appearance-none relative rounded-md border border-slate-500 px-3 py-2 outline-none capitalize w-full">
-            <?php foreach ($statusTransactions as $statusTransaction): ?>
-              <option value="<?= $statusTransaction ?>" <?= $status === $statusTransaction ? 'selected' : '' ?>>
-                <?= $statusTransaction ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
+          <input type="text" name="status" id="status" readonly required
+            class="rounded-md border border-slate-500 capitalize bg-[#F1F1F1] px-3 py-2 outline-none"
+            value="<?= $status === 'available' ? 'Tersedia' : 'Habis' ?>" />
         </div>
-        <div class="flex items-center gap-2">
-          <input type="checkbox" name="product-check" id="product-check" class="w-5 h-5" <?= $isProduct === 'yes' ? "checked" : "" ?> value="<?= $isProduct === 'yes' ? "yes" : "no" ?>" />
-          <label for="product-check" class="w-full text-sm text-slate-600 sm:text-base">Apakah ini berhubungan
-            dengan produk?</label>
-        </div>
+
         <div class="flex flex-col gap-3">
-          <label for="pesan-transaksi" class="text-slate-600">Pesan transaksi</label>
-          <input type="text" name="pesan-transaksi" id="pesan-transaksi" required
-            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="<?= $message ?>" />
-        </div>
-        <div class="flex flex-col gap-3 isproduct">
           <label for="nama-produk" class="text-slate-600">Nama produk</label>
           <input type="text" name="nama-produk" id="nama-produk" required
-            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="<?= $nameProduct ?>" />
+            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="<?= $name ?>" />
         </div>
         <div class="flex flex-col gap-3 isproduct">
           <label for="ukuran" class="text-slate-600">Ukuran
@@ -154,7 +99,7 @@
         <div class="flex flex-col gap-3 isproduct">
           <label for="stok" class="text-slate-600">Stok</label>
           <input type="number" name="stok" id="stok" required
-            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="<?= $stok == "" ? 0 : $stok ?>" />
+            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="<?= !$stok ? 0 : $stok ?>" />
         </div>
         <div class="flex flex-col gap-3 isproduct">
           <div class="flex justify-between items-center">
@@ -179,22 +124,13 @@
             <?php endforeach; ?>
           </select>
         </div>
-        <div class="flex flex-col gap-3">
-          <label for="total-harga" class="text-slate-600">Total harga</label>
-          <div class="relative flex items-center">
-            <span class="absolute left-3">Rp</span>
-            <input type="tel" name="total-harga" id="total-harga" required
-              class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none"
-              value="<?= number_format($totalPrice, 0, ".", ",") ?>" />
-          </div>
-        </div>
         <div class="flex flex-col gap-3 isproduct">
           <label for="harga-item" class="text-slate-600">Harga 1 barang</label>
           <div class="relative flex items-center">
             <span class="absolute left-3">Rp</span>
             <input type="tel" name="harga-item" id="harga-item" required
               class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none"
-              value="<?= $priceItem == "" ? '' : number_format($priceItem, 0, ".", ",") ?>" />
+              value="<?= $priceItem == "" ? 0 : number_format($priceItem, 0, ".", ",") ?>" />
           </div>
         </div>
         <div class="flex flex-col gap-3 isproduct">
@@ -207,23 +143,6 @@
               class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none"
               value="<?= number_format($priceMaxNego, 0, ".", ",") ?>" />
           </div>
-        </div>
-
-        <div class="flex flex-col gap-3">
-          <label for="biaya-admin" class="text-slate-600">Biaya admin kirim
-            <span class="text-xs text-slate-500">(Optional)</span></label>
-          <div class="relative flex items-center">
-            <span class="absolute left-3">Rp</span>
-            <input type="tel" name="biaya-admin" id="biaya-admin"
-              class="w-full rounded-md border border-slate-500 px-3 py-2 pl-9 outline-none"
-              value="<?= number_format($adminFee, 0, ".", ",") ?>" />
-          </div>
-        </div>
-        <div class="flex flex-col gap-3 isproduct">
-          <label for="resi-kurir" class="text-slate-600">Resi
-            <span class="text-xs text-slate-500">(Optional)</span></label>
-          <input type="text" name="resi-kurir" id="resi-kurir"
-            class="rounded-md border border-slate-500 px-3 py-2 outline-none" value="<?= $resi ?>" />
         </div>
         <div class="flex flex-col gap-3">
           <label for="keterangan" class="text-slate-600">Keterangan
@@ -289,7 +208,7 @@
         </div>
 
         <button type="submit" name="submit" id="btn-submit"
-          class="rounded-md w-full px-3 mt-5 py-2 outline-none btn-submit-active font-semibold">Ubah Transaksi</button>
+          class="rounded-md w-full px-3 mt-5 py-2 outline-none btn-submit-active font-semibold">Ubah Produk</button>
       </form>
     </section>
   </main>
@@ -297,7 +216,6 @@
 
 
   <script src="../script/app.js"></script>
-  <script src="../script/transactions.js"></script>
   <script src="../script/categories.js"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -18,6 +18,35 @@
     $transactions[] = $row;
   }
   $no = 1;
+
+  $queryGraph = mysqli_query($conn, "SELECT 
+    COALESCE(COUNT(DISTINCT transactions.transaction), 0) AS entry_products,
+    COALESCE(COUNT(DISTINCT stok.transaction), 0) AS out_products
+FROM (
+    SELECT 1 AS month UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 
+    UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 
+    UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12
+) AS AllMonths
+LEFT JOIN (
+    SELECT transaction, MONTH(datetime) AS month
+    FROM transactions
+    WHERE isProduct = 'yes' AND YEAR(datetime) = 2024
+) AS transactions ON AllMonths.month = transactions.month
+LEFT JOIN (
+    SELECT transaction, MONTH(datetime) AS month
+    FROM transactions
+    WHERE isProduct = 'yes' AND YEAR(datetime) = 2024 AND stok = 0
+) AS stok ON AllMonths.month = stok.month
+GROUP BY AllMonths.month
+ORDER BY AllMonths.month");
+
+  $entryProducts = [];
+  $outProducts = [];
+
+  while ($row = mysqli_fetch_assoc($queryGraph)) {
+    $entryProducts[] = $row['entry_products'];
+    $outProducts[] = $row['out_products'];
+  }
   ?>
   <main class="mt-20 px-4">
     <section class="container mx-auto">
@@ -81,7 +110,7 @@
                   <td>
                     <?= $date ?>
                   </td>
-                  <td class="text-left">
+                  <td class="text-left" data-username="<?= $username ?>">
                     <?= $transaction['author'] ?>
                   </td>
                   <td class="text-left">
@@ -108,7 +137,8 @@
                     class="font-medium capitalize <?= $transaction['status'] === 'pemasukkan' ? 'text-green-500' : 'text-red-500' ?>">
                     <?= $transaction['status'] ?>
                   </td>
-                  <td class="flex justify-center">
+                  <td class="text-center flex justify-center">
+
                     <div class="flex gap-2">
                       <a href="view-transactions.php?id=<?= $transaction['transaction'] ?>"
                         class="block w-max cursor-pointer rounded-md bg-blue-600 p-2 hover:opacity-75">
@@ -119,26 +149,29 @@
                           </path>
                         </svg>
                       </a>
-                      <a href="edit-transactions.php?id=<?= $transaction['transaction'] ?>"
-                        class="block w-max cursor-pointer rounded-md bg-green-600 p-2 hover:opacity-75">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"
-                          fill="rgba(255,255,255,1)">
-                          <path
-                            d="M12.8995 6.85453L17.1421 11.0972L7.24264 20.9967H3V16.754L12.8995 6.85453ZM14.3137 5.44032L16.435 3.319C16.8256 2.92848 17.4587 2.92848 17.8492 3.319L20.6777 6.14743C21.0682 6.53795 21.0682 7.17112 20.6777 7.56164L18.5563 9.68296L14.3137 5.44032Z">
-                          </path>
-                        </svg>
-                      </a>
-                      <a href="delete.php" class="block w-max cursor-pointer rounded-md bg-red-600 p-2 hover:opacity-75">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"
-                          fill="rgba(255,255,255,1)">
-                          <path
-                            d="M4 8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8ZM7 5V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V5H22V7H2V5H7ZM9 4V5H15V4H9ZM9 12V18H11V12H9ZM13 12V18H15V12H13Z">
-                          </path>
-                        </svg>
-                      </a>
+                      <?php if ($role !== 'user'): ?>
+                        <a href="edit-transactions.php?id=<?= $transaction['transaction'] ?>"
+                          class="block w-max cursor-pointer rounded-md bg-green-600 p-2 hover:opacity-75">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"
+                            fill="rgba(255,255,255,1)">
+                            <path
+                              d="M12.8995 6.85453L17.1421 11.0972L7.24264 20.9967H3V16.754L12.8995 6.85453ZM14.3137 5.44032L16.435 3.319C16.8256 2.92848 17.4587 2.92848 17.8492 3.319L20.6777 6.14743C21.0682 6.53795 21.0682 7.17112 20.6777 7.56164L18.5563 9.68296L14.3137 5.44032Z">
+                            </path>
+                          </svg>
+                        </a>
+                        <div
+                          class="block w-max cursor-pointer rounded-md bg-red-600 p-2 hover:opacity-75 btn-delete-transaction"
+                          id="<?= $transaction['transaction'] ?>">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"
+                            fill="rgba(255,255,255,1)">
+                            <path
+                              d="M4 8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8ZM7 5V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V5H22V7H2V5H7ZM9 4V5H15V4H9ZM9 12V18H11V12H9ZM13 12V18H15V12H13Z">
+                            </path>
+                          </svg>
+                        </div>
+                      <?php endif ?>
                     </div>
                   </td>
-
                 </tr>
                 <?php $no++; ?>
               <?php endforeach; ?>
@@ -154,8 +187,48 @@
   </main>
   <?php include '../components/footer.php' ?>
 
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../script/app.js"></script>
+  <script>
+    const btnDeleteTransactions = document.querySelectorAll('.btn-delete-transaction');
+    btnDeleteTransactions.forEach((btnDeleteTransaction) => {
+      btnDeleteTransaction.addEventListener('click', () => {
+        const idTransaction = btnDeleteTransaction.id;
+
+        Swal.fire({
+          title: "Apa kamu yakin mau menghapus?",
+          text: "Kamu data transaksi ini?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Iya, hapus saja!",
+        }).then(function (action) {
+          if (action.isConfirmed) {
+            $.ajax({
+              url: "../utils/functions.php",
+              type: "post",
+              data: {
+                action: "delTransaction",
+                idTransaction,
+              },
+              success: function (response) {
+                console.log(response);
+                const jsonResponse = JSON.parse(response);
+                if (jsonResponse["success"] == "success") {
+                  Swal.fire("Deleted!", "Transaksi kamu berhasil dihapus!", "success").then(() => {
+                    window.location.reload();
+                  });
+                }
+              },
+            });
+          }
+        });
+      })
+    })
+  </script>
   <script>
     const ctx = document.getElementById("myChart");
 
@@ -181,14 +254,14 @@
           {
             borderWidth: 1,
             label: "Total Produk Masuk",
-            data: [65, 59, 80, 81, 56, 55, 40, 10, 11, 2, 4, 2],
+            data: [<?= implode(',', $entryProducts) ?>],
             backgroundColor: "rgba(54, 162, 235, 0.2)",
             borderColor: "rgb(54, 162, 235)",
           },
           {
             borderWidth: 1,
             label: "Total Produk Terjual",
-            data: [11, 4, 21, 30, 52, 50, 20, 10, 2, 4, 2, 10],
+            data: [<?= implode(',', $outProducts) ?>],
             backgroundColor: "rgba(75, 192, 192, 0.2)",
             borderColor: "rgb(75, 192, 192)",
           },
@@ -200,9 +273,45 @@
             beginAtZero: true,
           },
         },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              title: function (tooltipItems) {
+                var month = tooltipItems[0].label;
+                if (month === 'Jan') {
+                  month = 'Januari';
+                } else if (month === 'Feb') {
+                  month = 'Februari';
+                } else if (month === 'Mar') {
+                  month = 'Maret';
+                } else if (month === 'Apr') {
+                  month = 'April';
+                } else if (month === 'Mei') {
+                  month = 'Mei';
+                } else if (month === 'Jun') {
+                  month = 'Juni';
+                } else if (month === 'Jul') {
+                  month = 'Juli';
+                } else if (month === 'Aug') {
+                  month = 'Agustus';
+                } else if (month === 'Sep') {
+                  month = 'September';
+                } else if (month === 'Oct') {
+                  month = 'Oktober';
+                } else if (month === 'Nov') {
+                  month = 'November';
+                } else if (month === 'Dec') {
+                  month = 'Desember';
+                }
+                return month;
+              }
+            }
+          }
+        }
       },
     });
   </script>
+
 </body>
 
 </html>
