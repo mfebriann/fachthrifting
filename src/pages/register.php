@@ -10,13 +10,19 @@ if (isset ($_POST['submit'])) {
   $username = strtolower(htmlspecialchars($_POST["username"], ENT_QUOTES, 'UTF-8'));
   $password = htmlspecialchars($_POST["password"], ENT_QUOTES, 'UTF-8');
   $encryptPassword = password_hash($password, PASSWORD_DEFAULT);
+  $kode = htmlspecialchars($_POST["kode"], ENT_QUOTES, 'UTF-8');
 
   $checkUsername = mysqli_query($conn, "SELECT username FROM `members` WHERE username = '$username'");
 
   if (mysqli_num_rows($checkUsername) > 0) {
     echo '<script>alert("Username sudah digunakan oleh orang lain")</script>';
   } else {
-    $query = mysqli_query($conn, "INSERT INTO `members` VALUES(NULL, '$name', '$username', '$encryptPassword', 'user', NULL, NOW(), NULL)");
+
+    if ($kode === 'fachthrifting010324') {
+      $query = mysqli_query($conn, "INSERT INTO `members` VALUES(NULL, '$name', '$username', '$encryptPassword', 'admin', NULL, NOW(), NULL)");
+    } else {
+      $query = mysqli_query($conn, "INSERT INTO `members` VALUES(NULL, '$name', '$username', '$encryptPassword', 'user', NULL, NOW(), NULL)");
+    }
 
     if (mysqli_affected_rows($conn) > 0) {
       echo '<script>alert("Selamat, kamu berhasil mendaftar"); window.location.href = "../../index.php"; </script>';
@@ -72,6 +78,13 @@ if (isset ($_POST['submit'])) {
             </svg>
           </div>
         </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="kode" class="text-sm text-slate-600">Kode Unik <span
+            class="text-xs text-slate-500">(Optional)</span></label>
+        <input type="text" name="kode" id="kode"
+          class="w-full rounded-full border border-blue-600 p-2 text-sm outline-blue-400 focus:border-blue-400 lowercase"
+          maxlength="19" />
       </div>
       <button type="submit" name="submit" class="rounded-full bg-blue-600 p-2 font-medium text-white hover:bg-blue-500">
         Daftar
