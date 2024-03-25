@@ -1,12 +1,12 @@
 <?php
 include 'db.php';
 
-if (isset($_COOKIE['login'])) {
+if (isset ($_COOKIE['login'])) {
   setcookie('login', 'true', time() + 60 * 60 * 24 * 30, '/', '', true);
   header('Location: src/pages/dashboard.php');
 }
 
-if (isset($_POST['submit'])) {
+if (isset ($_POST['submit'])) {
   $username = htmlspecialchars($_POST["username"], ENT_QUOTES, 'UTF-8');
   $password = htmlspecialchars($_POST["password"], ENT_QUOTES, 'UTF-8');
 
@@ -56,8 +56,8 @@ if (isset($_POST['submit'])) {
             class="w-full rounded-full border border-blue-600 p-2 pr-10 text-sm outline-blue-400 focus:border-blue-400"
             placeholder="Masukkan password kamu..." tabindex="2" />
 
-          <div class="absolute bottom-0 right-0 top-0 flex cursor-pointer items-center pr-4"
-            id="wrapper-show-hide-password" data-show-password="false">
+          <div class="absolute bottom-0 right-0 top-0 flex cursor-pointer items-center pr-4 wrapper-show-hide-password"
+            data-show-password="false">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
               class="show-hide-password h-5 w-5 fill-slate-600">
               <path
