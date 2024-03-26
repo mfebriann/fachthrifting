@@ -40,7 +40,7 @@
     $categories[] = $row;
   }
 
-  if (isset ($_POST['submit'])) {
+  if (isset($_POST['submit'])) {
     $status = htmlspecialchars($_POST['status'], ENT_QUOTES, 'UTF-8');
     $nameProduct = htmlspecialchars($_POST['nama-produk'], ENT_QUOTES, 'UTF-8');
     $description = $_POST['keterangan'] !== '' ? "'" . htmlspecialchars($_POST['keterangan'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
@@ -177,9 +177,9 @@
                 ?>
                 <div>
                   <div class="w-40 bg-slate-100">
-                    <div class="header-files">
+                    <a href="../images/products/<?= $pathImage ?>" class="header-files">
                       <img src="../images/products/<?= $pathImage ?>" alt="attachment" class="h-40 w-full object-cover">
-                    </div>
+                    </a>
                     <div class="flex flex-wrap justify-end gap-2 px-2 py-4">
                       <a href="../images/products/<?= $pathImage ?>" title="download" download="<?= $nameImage ?>"
                         class="no-underline action-file block px-1 text-sm rounded cursor-pointer hover:opacity-70">

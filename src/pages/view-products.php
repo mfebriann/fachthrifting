@@ -116,9 +116,9 @@
               ?>
               <div>
                 <div class="w-40 bg-slate-100">
-                  <div class="header-files">
+                  <a href="../images/products/<?= $pathImage ?>" class="header-files">
                     <img src="../images/products/<?= $pathImage ?>" alt="attachment" class="h-40 w-full object-cover">
-                  </div>
+                  </a>
                   <div class="flex flex-wrap justify-end gap-2 px-2 py-4">
                     <?php if ($role !== 'user'): ?>
                       <a href="../images/products/<?= $pathImage ?>" title="download" download="<?= $nameImage ?>"

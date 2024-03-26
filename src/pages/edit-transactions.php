@@ -48,8 +48,8 @@
     $categories[] = $row;
   }
 
-  if (isset ($_POST['submit'])) {
-    $isProduct = isset ($_POST['product-check']) ? 'yes' : 'no';
+  if (isset($_POST['submit'])) {
+    $isProduct = isset($_POST['product-check']) ? 'yes' : 'no';
     $status = htmlspecialchars($_POST['status'], ENT_QUOTES, 'UTF-8');
     $pesanTransaksi = htmlspecialchars($_POST['pesan-transaksi'], ENT_QUOTES, 'UTF-8');
     $totalHarga = str_replace(',', '', $_POST['total-harga']); // Tidak perlu htmlspecialchars() karena ini adalah angka
@@ -67,7 +67,7 @@
       $resi = $_POST['resi-kurir'] !== '' ? "'" . str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['resi-kurir']), ENT_QUOTES, 'UTF-8')) . "'" : "NULL";
       $statusProduct = intval($stok) == 0 || $stok === '' ? 'sold' : 'available';
 
-      if (isset ($productId)) {
+      if (isset($productId)) {
         mysqli_query($conn, "UPDATE `products` SET `name` = $nameProduct, `size` = $size, `stok` = $stok, `category` = '$category', `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `description` = $description, `image_code` = $idImages, `dateupdated` = NOW(), `status` = '$statusProduct', `is_show` = 'yes' WHERE product = $productId");
         mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW() WHERE transaction = $id");
       } else {
@@ -81,7 +81,7 @@
       }
 
     } else {
-      if (isset ($productId)) {
+      if (isset($productId)) {
         mysqli_query($conn, "UPDATE `products` SET `is_show` = 'no' WHERE product = $productId");
       }
 
@@ -258,9 +258,9 @@
                 ?>
                 <div>
                   <div class="w-40 bg-slate-100">
-                    <div class="header-files">
+                    <a href="../images/products/<?= $pathImage ?>" class="header-files">
                       <img src="../images/products/<?= $pathImage ?>" alt="attachment" class="h-40 w-full object-cover">
-                    </div>
+                    </a>
                     <div class="flex flex-wrap justify-end gap-2 px-2 py-4">
                       <a href="../images/products/<?= $pathImage ?>" title="download" download="<?= $nameImage ?>"
                         class="no-underline action-file block px-1 text-sm rounded cursor-pointer hover:opacity-70">
