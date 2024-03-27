@@ -12,13 +12,14 @@
   <?php include '../components/header.php' ?>
 
   <?php
-  $query = mysqli_query($conn, "SELECT `transaction`, `message`, `author`, `status`, `stok`, `category`, `resi`, `total_price`, `admin_fee`,  `datetime`  FROM `transactions` ORDER BY transaction DESC LIMIT 0, 10");
+  $query = mysqli_query($conn, "SELECT `transaction`, `message`, `author`, `status`, `stok`, `category`, `resi`, `total_price`, `admin_fee`,  `datetransaction`  FROM `transactions` ORDER BY `datetransaction` DESC LIMIT 0, 10");
   $transactions = [];
   while ($row = mysqli_fetch_assoc($query)) {
     $transactions[] = $row;
   }
   $no = 1;
 
+  $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
   $queryGraph = mysqli_query($conn, "SELECT 
     COALESCE(COUNT(DISTINCT transactions.transaction), 0) AS entry_products,
     COALESCE(COUNT(DISTINCT stok.transaction), 0) AS out_products
@@ -28,14 +29,14 @@ FROM (
     UNION SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12
 ) AS AllMonths
 LEFT JOIN (
-    SELECT transaction, MONTH(datetime) AS month
+    SELECT transaction, MONTH(datetransaction) AS month
     FROM transactions
-    WHERE isProduct = 'yes' AND YEAR(datetime) = 2024
+    WHERE isProduct = 'yes' AND YEAR(datetransaction) = $year
 ) AS transactions ON AllMonths.month = transactions.month
 LEFT JOIN (
-    SELECT transaction, MONTH(datetime) AS month
+    SELECT transaction, MONTH(datetransaction) AS month
     FROM transactions
-    WHERE isProduct = 'yes' AND YEAR(datetime) = 2024 AND stok = 0
+    WHERE isProduct = 'yes' AND YEAR(datetransaction) = $year AND stok = 0
 ) AS stok ON AllMonths.month = stok.month
 GROUP BY AllMonths.month
 ORDER BY AllMonths.month");
@@ -47,10 +48,19 @@ ORDER BY AllMonths.month");
     $entryProducts[] = $row['entry_products'];
     $outProducts[] = $row['out_products'];
   }
+
+  $years = range(2024, 2030);
   ?>
   <main class="mt-20 px-4">
     <section class="container mx-auto">
       <h1 class="text-3xl font-semibold text-slate-700 mb-4">Dashboard</h1>
+      <select name="year" id="year" class="mb-5 rounded-md border border-slate-500 p-1 outline-none ml-auto block">
+        <?php foreach ($years as $year): ?>
+          <option value="<?= $year ?>" <?= $year == $_GET['year'] ? 'selected' : '' ?>>
+            <?= $year ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
       <div class="overflow-auto">
         <canvas id="myChart" style="max-height: 512px"></canvas>
       </div>
@@ -66,7 +76,10 @@ ORDER BY AllMonths.month");
                 No
               </th>
               <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
-                Tanggal
+                Aksi
+              </th>
+              <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
+                Tanggal Transaksi
               </th>
               <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
                 Nama Pembuat
@@ -92,9 +105,6 @@ ORDER BY AllMonths.month");
               <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
                 Status
               </th>
-              <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
-                Aksi
-              </th>
             </tr>
           </thead>
           <tbody class="[&>*:nth-child(even)]:bg-white [&>*:nth-child(odd)]:bg-slate-100">
@@ -102,43 +112,12 @@ ORDER BY AllMonths.month");
               <?php foreach ($transactions as $transaction): ?>
                 <tr>
                   <?php
-                  $date = date("d/m/Y", strtotime($transaction['datetime']));
+                  $date = date("d/m/Y", strtotime($transaction['datetransaction']));
                   ?>
                   <td class="text-center">
                     <?= $no ?>
                   </td>
-                  <td>
-                    <?= $date ?>
-                  </td>
-                  <td class="text-left" data-username="<?= $username ?>">
-                    <?= $transaction['author'] ?>
-                  </td>
-                  <td class="text-left">
-                    <?= $transaction['message'] ?>
-                  </td>
-                  <td>
-                    <?= !$transaction['resi'] ? '-' : $transaction['resi'] ?>
-                  </td>
-                  <td>
-                    Rp.
-                    <?= number_format($transaction['total_price']) ?>
-                  </td>
-                  <td>
-                    Rp.
-                    <?= number_format($transaction['admin_fee']) ?>
-                  </td>
-                  <td>
-                    <?= !$transaction['stok'] ? '-' : $transaction['stok'] ?>
-                  </td>
-                  <td class="capitalize">
-                    <?= !$transaction['category'] ? '-' : str_replace('-', ' ', $transaction['category']) ?>
-                  </td>
-                  <td
-                    class="font-medium capitalize <?= $transaction['status'] === 'pemasukkan' ? 'text-green-500' : 'text-red-500' ?>">
-                    <?= $transaction['status'] ?>
-                  </td>
                   <td class="text-center flex justify-center">
-
                     <div class="flex gap-2">
                       <a href="view-transactions.php?id=<?= $transaction['transaction'] ?>"
                         class="block w-max cursor-pointer rounded-md bg-blue-600 p-2 hover:opacity-75">
@@ -171,6 +150,36 @@ ORDER BY AllMonths.month");
                         </div>
                       <?php endif ?>
                     </div>
+                  </td>
+                  <td>
+                    <?= $date ?>
+                  </td>
+                  <td class="text-left" data-username="<?= $username ?>">
+                    <?= $transaction['author'] ?>
+                  </td>
+                  <td class="text-left">
+                    <?= $transaction['message'] ?>
+                  </td>
+                  <td>
+                    <?= !$transaction['resi'] ? '-' : $transaction['resi'] ?>
+                  </td>
+                  <td>
+                    Rp.
+                    <?= number_format($transaction['total_price']) ?>
+                  </td>
+                  <td>
+                    Rp.
+                    <?= number_format($transaction['admin_fee']) ?>
+                  </td>
+                  <td>
+                    <?= !$transaction['stok'] ? '-' : $transaction['stok'] ?>
+                  </td>
+                  <td class="capitalize">
+                    <?= !$transaction['category'] ? '-' : str_replace('-', ' ', $transaction['category']) ?>
+                  </td>
+                  <td
+                    class="font-medium capitalize <?= $transaction['status'] === 'pemasukkan' ? 'text-green-500' : 'text-red-500' ?>">
+                    <?= $transaction['status'] ?>
                   </td>
                 </tr>
                 <?php $no++; ?>
@@ -310,6 +319,9 @@ ORDER BY AllMonths.month");
         }
       },
     });
+
+    const changeYear = document.getElementById('year');
+    changeYear.addEventListener('change', () => window.location.href = `?year=${changeYear.value}`)
   </script>
 
 </body>

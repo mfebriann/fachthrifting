@@ -32,6 +32,7 @@
   $adminFee = $response['admin_fee'];
   $description = $response['description'];
   $images = $response['images'];
+  $dateTransaction = $response['datetransaction'];
   ?>
 
   <main class="mt-20 px-4">
@@ -47,6 +48,12 @@
           <label for="pembuat" class="text-slate-600">Pengguna yang membuat</label>
           <input type="text" name="pembuat" id="pembuat" autocomplete="name" required readonly
             class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $author ?>" />
+        </div>
+        <div class="flex flex-col gap-3">
+          <label for="tanggal-transaksi" class="text-slate-600">Waktu transaksi</label>
+          <input type="date" required name="tanggal-transaksi" id="tanggal-transaksi"
+            class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none capitalize"
+            value="<?= $dateTransaction ?>" />
         </div>
         <div class="flex flex-col gap-3">
           <label for="status" class="text-slate-600">Status transaksi</label>

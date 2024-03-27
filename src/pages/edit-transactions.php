@@ -39,6 +39,7 @@
   $adminFee = $response['admin_fee'];
   $description = $response['description'];
   $images = $response['images'];
+  $dateTransaction = $response['datetransaction'];
   $statusTransactions = ['pengeluaran', 'pemasukkan'];
 
   // Category
@@ -56,6 +57,7 @@
     $adminFee = $_POST['biaya-admin'] !== '' ? "'" . str_replace(',', '', $_POST['biaya-admin']) . "'" : "NULL";
     $description = $_POST['keterangan'] !== '' ? "'" . htmlspecialchars($_POST['keterangan'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
     $idImages = $_POST['id-images'] !== '' ? "'" . $_POST['id-images'] . "'" : "NULL";
+    $updateDateTransaction = $_POST['tanggal-transaksi'];
 
     if ($isProduct === 'yes') {
       $nameProduct = $_POST['nama-produk'] !== '' ? "'" . htmlspecialchars($_POST['nama-produk'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
@@ -69,14 +71,15 @@
 
       if (isset($productId)) {
         mysqli_query($conn, "UPDATE `products` SET `name` = $nameProduct, `size` = $size, `stok` = $stok, `category` = '$category', `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `description` = $description, `image_code` = $idImages, `dateupdated` = NOW(), `status` = '$statusProduct', `is_show` = 'yes' WHERE product = $productId");
-        mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW() WHERE transaction = $id");
+
+        mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW(), `datetransaction` = '$updateDateTransaction' WHERE transaction = $id");
       } else {
         mysqli_query($conn, "INSERT INTO `products` VALUES(NULL, '$name', $authorId, $nameProduct, $size, $stok, '$category', $hargaItem, $hargaMaxNego, $description, $idImages, NOW(), NULL, 'available', 'yes')");
 
         $query = mysqli_query($conn, "SELECT product FROM `products` ORDER BY product DESC LIMIT 0,1");
         $productId = mysqli_fetch_assoc($query)['product'];
 
-        mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW(), product_id = $productId WHERE transaction = $id");
+        mysqli_query($conn, "UPDATE `transactions` SET `message` = '$pesanTransaksi',  `name_product` = $nameProduct, `isproduct` = '$isProduct', `status` = '$status', `size` = $size, `stok` = $stok, `category` = '$category', `total_price` = $totalHarga, `price_item` = $hargaItem, `price_max_nego` = $hargaMaxNego, `admin_fee` = $adminFee, `resi` = $resi, `description` = $description, `images` = $idImages, `dateupdated` = NOW(), product_id = $productId, `datetransaction` = '$updateDateTransaction' WHERE transaction = $id");
 
       }
 
@@ -118,6 +121,12 @@
           <label for="pembuat" class="text-slate-600">Pengguna yang membuat</label>
           <input type="text" name="pembuat" id="pembuat" readonly autocomplete="name" required
             class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $author ?>" />
+        </div>
+        <div class="flex flex-col gap-3">
+          <label for="tanggal-transaksi" class="text-slate-600">Waktu transaksi</label>
+          <input type="date" required name="tanggal-transaksi" id="tanggal-transaksi"
+            class="appearance-none relative rounded-md border border-slate-500 px-3 py-2 outline-none capitalize w-full"
+            value="<?= $dateTransaction ?>" />
         </div>
         <div class="flex flex-col gap-3">
           <label for="status" class="text-slate-600">Status transaksi</label>

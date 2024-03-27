@@ -19,15 +19,16 @@
     $categories[] = $row;
   }
 
-  if (isset ($_POST['submit'])) {
+  if (isset($_POST['submit'])) {
     $authorId = $response['member'];
-    $isProduct = isset ($_POST['product-check']) ? 'yes' : 'no';
+    $isProduct = isset($_POST['product-check']) ? 'yes' : 'no';
     $status = $_POST['status'];
     $pesanTransaksi = htmlspecialchars($_POST['pesan-transaksi'], ENT_QUOTES, 'UTF-8');
     $totalHarga = str_replace(',', '', htmlspecialchars(str_replace('.', '', $_POST['total-harga']), ENT_QUOTES, 'UTF-8'));
     $adminFee = $_POST['biaya-admin'] !== '' ? "'" . str_replace(',', '', $_POST['biaya-admin']) . "'" : "NULL";
     $description = $_POST['keterangan'] !== '' ? "'" . htmlspecialchars($_POST['keterangan'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
     $idImages = $_POST['id-images'] !== '' ? "'" . $_POST['id-images'] . "'" : "NULL";
+    $dateTransaction = $_POST['tanggal-transaksi'];
 
     if ($isProduct === 'yes') {
       $nameProduct = $_POST['nama-produk'] !== '' ? "'" . htmlspecialchars($_POST['nama-produk'], ENT_QUOTES, 'UTF-8') . "'" : "NULL";
@@ -43,9 +44,9 @@
       $query = mysqli_query($conn, "SELECT product FROM `products` ORDER BY product DESC LIMIT 0,1");
       $productId = mysqli_fetch_assoc($query)['product'];
 
-      mysqli_query($conn, "INSERT INTO `transactions` VALUES(NULL, '{$pesanTransaksi}', '$name', $authorId, $nameProduct, '$isProduct', '$status', $size, $stok, '$category', $resi, '$totalHarga', '$hargaItem', $hargaMaxNego, $adminFee, $description, $idImages, $productId ,NOW(), NULL)");
+      mysqli_query($conn, "INSERT INTO `transactions` VALUES(NULL, '{$pesanTransaksi}', '$name', $authorId, $nameProduct, '$isProduct', '$status', $size, $stok, '$category', $resi, '$totalHarga', '$hargaItem', $hargaMaxNego, $adminFee, $description, $idImages, $productId ,NOW(), NULL, '$dateTransaction')");
     } else {
-      mysqli_query($conn, "INSERT INTO `transactions` (`transaction`, `message`, author, author_id, `status`, isproduct, total_price, admin_fee, `description`, images, `datetime`) VALUES(NULL, '$pesanTransaksi', '$name', $authorId, '$status', '$isProduct', $totalHarga, $adminFee, $description, $idImages, NOW())");
+      mysqli_query($conn, "INSERT INTO `transactions` (`transaction`, `message`, author, author_id, `status`, isproduct, total_price, admin_fee, `description`, images, `datetime`, `datetransaction`) VALUES(NULL, '$pesanTransaksi', '$name', $authorId, '$status', '$isProduct', $totalHarga, $adminFee, $description, $idImages, NOW(), '$dateTransaction')");
     }
 
     if (mysqli_affected_rows($conn) > 0) {
@@ -69,6 +70,12 @@
           <label for="pembuat" class="text-slate-600">Pengguna yang membuat</label>
           <input type="text" name="pembuat" id="pembuat" readonly autocomplete="name" required
             class="rounded-md border border-slate-500 bg-[#F1F1F1] px-3 py-2 outline-none" value="<?= $name ?>" />
+        </div>
+        <div class="flex flex-col gap-3">
+          <label for="tanggal-transaksi" class="text-slate-600">Waktu transaksi</label>
+          <input type="date" required name="tanggal-transaksi" id="tanggal-transaksi"
+            class="appearance-none relative rounded-md border border-slate-500 px-3 py-2 outline-none capitalize w-full"
+            value="<?= date('Y-m-d') ?>" />
         </div>
         <div class="flex flex-col gap-3">
           <label for="status" class="text-slate-600">Status transaksi</label>

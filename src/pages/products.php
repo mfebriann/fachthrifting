@@ -13,12 +13,12 @@
   <?php include '../components/header.php' ?>
 
   <?php
-  if (isset ($_GET['date']) && isset ($_GET['status'])) {
+  if (isset($_GET['date']) && isset($_GET['status'])) {
     $date = $_GET['date'];
     $status = $_GET['status'];
     $query = mysqli_query($conn, "SELECT `product`, `name`, `author`, `status`, `stok`, `category`, `price_item`, `datetime` FROM `products` WHERE DATE_FORMAT(`datetime`, '%Y-%m') = '$date' AND status = '$status' AND is_show = 'yes' ORDER BY product DESC");
-  } else if (isset ($_GET['date']) || isset ($_GET['status'])) {
-    if (isset ($_GET['date'])) {
+  } else if (isset($_GET['date']) || isset($_GET['status'])) {
+    if (isset($_GET['date'])) {
       $date = $_GET['date'];
       $query = mysqli_query($conn, "SELECT `product`, `name`, `author`, `status`, `stok`, `category`, `price_item`, `datetime` FROM `products` WHERE DATE_FORMAT(`datetime`, '%Y-%m') = '$date' AND is_show = 'yes' ORDER BY product DESC");
     } else {
@@ -54,7 +54,7 @@
         <div class="bg-green-500 rounded-md text-white p-4 h-36">
           <div class="flex justify-between flex-wrap gap-2">
             <p class="font-semibold">Total Stok Tersedia</p>
-            <a href="<?= isset ($_GET['date']) ? '?date=' . $_GET['date'] . '&status=available' : '?status=available' ?>"
+            <a href="<?= isset($_GET['date']) ? '?date=' . $_GET['date'] . '&status=available' : '?status=available' ?>"
               class="text-sm underline text-white hover:opacity-70">Lihat disini</a>
           </div>
           <p class="text-3xl font-bold mt-2">
@@ -64,7 +64,7 @@
         <div class="bg-red-500 rounded-md text-white p-4 h-36">
           <div class="flex justify-between flex-wrap gap-2">
             <p class="font-semibold">Total Stok Terjual</p>
-            <a href="<?= isset ($_GET['date']) ? '?date=' . $_GET['date'] . '&status=sold' : '?status=sold' ?>"
+            <a href="<?= isset($_GET['date']) ? '?date=' . $_GET['date'] . '&status=sold' : '?status=sold' ?>"
               class="text-sm underline text-white hover:opacity-70">Lihat disini</a>
           </div>
           <p class=" text-3xl font-bold mt-2">
@@ -78,7 +78,7 @@
           <div class="flex items-center flex-col-reverse gap-3 w-full sm:w-max sm:ml-auto sm:flex-row">
             <a href="./products.php" class="text-red-600 underline text-sm">Hapus Filter</a>
             <input type="month" id="date" class="border-blue-600 border px-4 rounded py-2 w-full sm:w-max" name="date"
-              value="<?= isset ($_GET['date']) ? $_GET['date'] : '' ?>">
+              value="<?= isset($_GET['date']) ? $_GET['date'] : '' ?>">
           </div>
         </div>
         <table cellpadding="10" class="w-full" id="products">
@@ -88,7 +88,7 @@
                 No
               </th>
               <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
-                Tanggal
+                Aksi
               </th>
               <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
                 Nama Pembuat
@@ -108,41 +108,13 @@
               <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
                 Status
               </th>
-              <th class="border border-white bg-blue-600 px-4 py-3 text-center font-semibold text-white">
-                Aksi
-              </th>
             </tr>
           </thead>
           <tbody class="[&>*:nth-child(even)]:bg-white [&>*:nth-child(odd)]:bg-slate-100">
             <?php foreach ($products as $product): ?>
               <tr>
-                <?php
-                $date = date("d/m/Y", strtotime($product['datetime']));
-                ?>
                 <td class="text-center">
                   <?= $no ?>
-                </td>
-                <td>
-                  <?= $date ?>
-                </td>
-                <td class="text-left" data-username="<?= $username ?>">
-                  <?= $product['author'] ?>
-                </td>
-                <td class="text-left">
-                  <?= $product['name'] ?>
-                </td>
-                <td>
-                  <?= 'Rp. ' . number_format($product['price_item']) ?>
-                </td>
-                <td>
-                  <?= $product['stok'] === NULL ? '-' : ($product['stok'] === 0 ? 0 : $product['stok']) ?>
-                </td>
-                <td class="capitalize">
-                  <?= !$product['category'] ? '-' : str_replace('-', ' ', $product['category']) ?>
-                </td>
-                <td
-                  class="font-medium capitalize <?= $product['status'] === 'available' ? 'text-green-500' : 'text-red-500' ?>">
-                  <?= $product['status'] === 'available' ? 'Tersedia' : 'Habis' ?>
                 </td>
                 <td class="text-center flex justify-center">
                   <div class="flex gap-2">
@@ -167,6 +139,25 @@
                       </a>
                     <?php endif; ?>
                   </div>
+                </td>
+                <td class="text-left" data-username="<?= $username ?>">
+                  <?= $product['author'] ?>
+                </td>
+                <td class="text-left">
+                  <?= $product['name'] ?>
+                </td>
+                <td>
+                  <?= 'Rp. ' . number_format($product['price_item']) ?>
+                </td>
+                <td>
+                  <?= $product['stok'] === NULL ? '-' : ($product['stok'] === 0 ? 0 : $product['stok']) ?>
+                </td>
+                <td class="capitalize">
+                  <?= !$product['category'] ? '-' : str_replace('-', ' ', $product['category']) ?>
+                </td>
+                <td
+                  class="font-medium capitalize <?= $product['status'] === 'available' ? 'text-green-500' : 'text-red-500' ?>">
+                  <?= $product['status'] === 'available' ? 'Tersedia' : 'Habis' ?>
                 </td>
               </tr>
               <?php $no++; ?>
@@ -205,7 +196,7 @@
               title: sizeParamaters === 0 ? 'Laporan Stok Produk Fach Thrifting' : `Laporan Stok Produk Fach Thrifting - ${currentMonthAndYear}`,
               extend: 'pdfHtml5',
               exportOptions: {
-                columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                columns: [0, 2, 3, 4, 5, 6, 7]
               },
             },
             {
@@ -213,7 +204,7 @@
               title: sizeParamaters === 0 ? 'Laporan Stok Produk Fach Thrifting' : `Laporan Stok Produk Fach Thrifting - ${currentMonthAndYear}`,
               extend: 'excelHtml5',
               exportOptions: {
-                columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                columns: [0, 2, 3, 4, 5, 6, 7]
               },
               exportStyles: {
                 cssStyles: ['red_highlight', 'yellow_highlight'],
